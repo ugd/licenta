@@ -1,0 +1,51 @@
+{
+    "name": "thenextweb/passgenerator",
+    "description": "A Laravel package to create Apple Wallet (old Passbook) compatible tickets.",
+    "type": "library",
+    "license": "GPL-3.0-or-later",
+    "keywords": [
+        "php",
+        "laravel",
+        "Apple",
+        "Passbook"
+    ],
+    "authors": [
+        {
+            "name": "The Next Web BV",
+            "email": "support@thenextweb.com"
+        }
+    ],
+    "require": {
+        "ext-zip": "*",
+        "illuminate/support": "^7.0|^8.0|^9.0|^10.0",
+        "illuminate/filesystem": "^7.0|^8.0|^9.0|^10.0",
+        "thecodingmachine/safe": "^2.1"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.2",
+        "orchestra/testbench": "^5.0|^6.0|^7.0|^8.0",
+        "phpstan/phpstan": "^1.6",
+        "phpunit/phpunit": "^9.3",
+        "rector/rector": "^0.12|^0.15",
+        "thecodingmachine/phpstan-safe-rule": "^1.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Thenextweb\\": "src"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Thenextweb\\PassGeneratorServiceProvider"
+            ],
+            "aliases": {
+                "PassGenerator": "Thenextweb\\Facades\\PassGenerator"
+            }
+        }
+    },
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true
+    }
+}

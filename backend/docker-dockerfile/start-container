@@ -1,0 +1,73 @@
+#!/bin/bash
+
+mkdir -p /var/www/html/public /var/www/html/storage /var/www/html/resources /var/www/html/database
+chown -R sail:sail /var/www/html/public /var/www/html/storage /var/www/html/resources /var/www/html/database
+chmod -R 755 /var/www/html/public /var/www/html/storage /var/www/html/resources /var/www/html/database
+
+if [ -z "$(ls -A /var/www/html/public)" ]; then
+    cp -r /var/initial-content/public/* /var/www/html/public/
+fi
+
+if [ -z "$(ls -A /var/www/html/storage)" ]; then
+    cp -r /var/initial-content/storage/* /var/www/html/storage/
+fi
+
+if [ -z "$(ls -A /var/www/html/resources)" ]; then
+    cp -r /var/initial-content/resources/* /var/www/html/resources/
+fi
+
+if [ -z "$(ls -A /var/www/html/database)" ]; then
+    cp -r /var/initial-content/database/* /var/www/html/database/
+fi
+
+chown -R 1337:sail /var/www/html
+find /var/www/html -type d -exec chmod 775 {} \;
+find /var/www/html -type f -exec chmod 664 {} \;
+
+if [ ! -z "$WWWUSER" ]; then
+    usermod -u $WWWUSER sail
+fi
+
+if [ ! -d /.composer ]; then
+    mkdir /.composer
+fi
+chmod -R ugo+rw /.composer
+
+echo "Await DB..."
+DB_HOST=${DB_HOST:-mariadb}
+until nc -z $DB_HOST 3306; do
+    echo "DB $DB_HOST is not available - waiting..."
+    sleep 1
+done
+
+echo "DB is available!"
+
+if [ -f "/var/www/html/artisan" ]; then
+    if [ ! -d "/var/www/html/vendor" ]; then
+        echo "Installing Composer dependencies..."
+        composer install --no-interaction --optimize-autoloader
+        touch /var/www/html/storage/logs/laravel.log
+        chown sail:sail /var/www/html/storage/logs/laravel.log
+        chown -R sail:sail /var/www/html/storage /var/www/html/bootstrap/cache
+        chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+        npm install
+        npm run build
+    fi
+
+    if [ ! -f "/var/www/html/database/seeded.lock" ]; then
+        php /var/www/html/artisan migrate --force
+        php /var/www/html/artisan db:seed --force
+        touch /var/www/html/database/seeded.lock
+        chown sail:sail /var/www/html/database/seeded.lock
+    fi
+
+    php /var/www/html/artisan storage:link
+    php /var/www/html/artisan optimize:clear
+
+fi
+
+if [ $# -gt 0 ]; then
+    exec gosu sail "$@"
+else
+    exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+fi

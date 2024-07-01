@@ -1,0 +1,65 @@
+services:
+  licenta-backend:
+    image: <your-gitlab-container-registry-url>/<your-gitlab-group>/<your-gitlab-project>/<your-gitlab-container-name>:latest
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8000:80"
+      - "${VITE_PORT:-5173}:${VITE_PORT:-5173}"
+    environment:
+      WWWUSER: "${WWWUSER}"
+      LARAVEL_SAIL: 1
+      XDEBUG_MODE: "${SAIL_XDEBUG_MODE:-off}"
+      XDEBUG_CONFIG: "${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}"
+      IGNITION_LOCAL_SITES_PATH: "${PWD}"
+    env_file:
+      - .env
+    networks:
+      - licenta-backend-network
+    depends_on:
+      - mariadb
+    restart: unless-stopped
+    volumes:
+      - api-app-public:/var/www/html/public
+      - api-app-storage:/var/www/html/storage
+      - api-app-resources:/var/www/html/resources
+      - api-app-database-seeds:/var/www/html/database/seeds
+  mariadb:
+    image: "mariadb:10"
+    ports:
+      - "${FORWARD_DB_PORT:-3306}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DB_ROOD_PASSWORD}"
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: "${DB_DATABASE}"
+      MYSQL_USER: "${DB_USERNAME}"
+      MYSQL_PASSWORD: "${DB_PASSWORD}"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    volumes:
+      - "sail-mariadb:/var/lib/mysql"
+    hostname: mariadb
+    networks:
+      - licenta-backend-network
+    healthcheck:
+      test:
+        - CMD
+        - mysqladmin
+        - ping
+        - "-p${DB_PASSWORD}"
+      retries: 3
+      timeout: 5s
+    restart: unless-stopped
+networks:
+  licenta-backend-network:
+    driver: bridge
+volumes:
+  sail-mariadb:
+    driver: local
+  api-app-public:
+    driver: local
+  api-app-storage:
+    driver: local
+  api-app-resources:
+    driver: local
+  api-app-database-seeds:
+    driver: local

@@ -1,0 +1,11 @@
+version: "3.9"
+
+services:
+  frontend_app:
+    image: <your-gitlab-container-registry-url>/<your-gitlab-group>/<your-gitlab-project>/<your-gitlab-container-name>:latest
+    container_name: licenta-frontend
+    env_file:
+      - .env
+    ports:
+      - "9000:80"
+    restart: unless-stopped

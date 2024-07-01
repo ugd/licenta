@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+if [ ! -z "$WWWUSER" ]; then
+    usermod -u $WWWUSER sail
+fi
+
+if [ ! -d /.composer ]; then
+    mkdir /.composer
+fi
+
+chmod -R ugo+rw /.composer
+
+echo "Așteaptă până când baza de date este disponibilă..."
+# Înlocuiește hostul și detaliile de conectare conform configurării tale
+until nc -z mariadb 3306; do
+    echo "Baza de date nu este disponibilă - așteptând"
+    sleep 1
+done
+
+echo "Baza de date este disponibilă!"
+
+# Continuă cu restul scriptului
+if [ -f "/var/www/html/artisan" ]; then
+    # Așteaptă să te asiguri că serviciile de care depinzi sunt în sus și rulează
+    if [ ! -f "/var/www/html/database/seeded" ]; then
+        gosu $WWWUSER php /var/www/html/artisan migrate --force
+        gosu $WWWUSER php /var/www/html/artisan db:seed --force
+        touch /var/www/html/database/seeded
+    fi
+
+    if [ ! -L "/var/www/html/public/storage" ]; then
+        gosu $WWWUSER php /var/www/html/artisan storage:link
+    fi
+fi
+
+if [ $# -gt 0 ]; then
+    exec gosu $WWWUSER "$@"
+else
+    exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+fi
