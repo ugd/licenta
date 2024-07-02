@@ -158,6 +158,8 @@
             label="Nivel"
             :options="permissionOptions"
             required
+            emit-value
+            map-options
             :rules="[(val) => !!val || 'Nivelul este obligatoriu']"
           />
           <q-input
@@ -203,10 +205,10 @@
 </template>
 
 <script lang="ts">
-import { useAuthStore } from 'src/stores/auth-store';
-import { defineComponent, onMounted, ref } from 'vue';
-import { api } from 'src/boot/axios';
-import { useQuasar } from 'quasar';
+import { useAuthStore } from "src/stores/auth-store";
+import { defineComponent, onMounted, ref } from "vue";
+import { api } from "src/boot/axios";
+import { useQuasar } from "quasar";
 
 interface UserDto {
   id?: number;
@@ -224,7 +226,7 @@ export enum EditType {
 }
 
 export default defineComponent({
-  name: 'UsersView',
+  name: "UsersView",
   setup() {
     const authStore = useAuthStore();
     const rows = ref([] as UserDto[]);
@@ -240,49 +242,49 @@ export default defineComponent({
     const $q = useQuasar();
     const columns = [
       {
-        name: 'name',
+        name: "name",
         required: true,
-        label: 'Nume',
-        align: 'left',
+        label: "Nume",
+        align: "left",
         field: (row: UserDto) => row.name,
         format: (val: UserDto) => `${val}`,
         sortable: true,
       },
       {
-        name: 'email',
-        align: 'left',
-        label: 'Email',
-        field: 'email',
+        name: "email",
+        align: "left",
+        label: "Email",
+        field: "email",
         sortable: true,
       },
       {
-        name: 'permisiune_id',
-        label: 'Nivel',
-        field: 'permisiune_id',
+        name: "permisiune_id",
+        label: "Nivel",
+        field: "permisiune_id",
         sortable: true,
         format: (val: number) => {
           if (val === 1) {
-            return 'Admin';
+            return "Admin";
           } else if (val === 2) {
-            return 'Gate Check';
+            return "Gate Check";
           }
         },
       },
     ];
     const permissionOptions = [
-      { label: 'Admin', value: 1 },
-      { label: 'Gate Check', value: 2 },
+      { label: "Admin", value: 1 },
+      { label: "Gate Check", value: 2 },
     ];
 
     const getUsersFromAPI = async () => {
-      const response = await api.get('/admin/users', {
+      const response = await api.get("/admin/users", {
         headers: { Authorization: `Bearer ${authStore.getToken}` },
       });
 
       if (response.status === 200) {
         rows.value = response.data;
       } else {
-        console.error('Get users failed:', response.status, response.data);
+        console.error("Get users failed:", response.status, response.data);
       }
     };
     const editUser = (userRow: UserDto) => {
@@ -317,19 +319,19 @@ export default defineComponent({
         editUserPopup.value = false;
         permissionsLoaded.value = false;
         $q.notify({
-          message: 'Utilizatorul a fost editat cu succes',
-          color: 'positive',
-          icon: 'done',
-          position: 'top-right',
+          message: "Utilizatorul a fost editat cu succes",
+          color: "positive",
+          icon: "done",
+          position: "top-right",
           timeout: 2000,
         });
       } else {
-        console.error('Update user failed:', response.status, response.data);
+        console.error("Update user failed:", response.status, response.data);
         $q.notify({
-          message: 'Editarea utilizatorului a esuat',
-          color: 'negative',
-          icon: 'report_problem',
-          position: 'top-right',
+          message: "Editarea utilizatorului a esuat",
+          color: "negative",
+          icon: "report_problem",
+          position: "top-right",
           timeout: 2000,
         });
       }
@@ -352,26 +354,26 @@ export default defineComponent({
         getUsersFromAPI();
         logoutUserPopup.value = false;
         $q.notify({
-          message: 'Utilizatorul a fost delogat cu succes',
-          color: 'positive',
-          icon: 'done',
-          position: 'top-right',
+          message: "Utilizatorul a fost delogat cu succes",
+          color: "positive",
+          icon: "done",
+          position: "top-right",
           timeout: 2000,
         });
       } else {
-        console.error('Logout user failed:', response.status, response.data);
+        console.error("Logout user failed:", response.status, response.data);
         $q.notify({
-          message: 'Delogarea utilizatorului a esuat',
-          color: 'negative',
-          icon: 'report_problem',
-          position: 'top-right',
+          message: "Delogarea utilizatorului a esuat",
+          color: "negative",
+          icon: "report_problem",
+          position: "top-right",
           timeout: 2000,
         });
       }
     };
     const addUserInBackend = async () => {
       const response = await api.post(
-        '/admin/user',
+        "/admin/user",
         {
           name: newUser.value.name,
           email: newUser.value.email,
@@ -386,25 +388,25 @@ export default defineComponent({
         getUsersFromAPI();
         addUserPopup.value = false;
         $q.notify({
-          message: 'Utilizatorul a fost adaugat cu succes',
-          color: 'positive',
-          icon: 'done',
-          position: 'top-right',
+          message: "Utilizatorul a fost adaugat cu succes",
+          color: "positive",
+          icon: "done",
+          position: "top-right",
           timeout: 2000,
         });
       } else {
-        console.error('Add user failed:', response.status, response.data);
+        console.error("Add user failed:", response.status, response.data);
         $q.notify({
-          message: 'Adaugarea utilizatorului a esuat',
-          color: 'negative',
-          icon: 'report_problem',
-          position: 'top-right',
+          message: "Adaugarea utilizatorului a esuat",
+          color: "negative",
+          icon: "report_problem",
+          position: "top-right",
           timeout: 2000,
         });
       }
     };
     const getEvents = async () => {
-      const response = await api.get('/admin/events', {
+      const response = await api.get("/admin/events", {
         headers: { Authorization: `Bearer ${authStore.getToken}` },
       });
       if (response.status === 200) {
@@ -416,7 +418,7 @@ export default defineComponent({
           };
         });
       } else {
-        console.error('Get events failed:', response.status, response.data);
+        console.error("Get events failed:", response.status, response.data);
       }
     };
 
@@ -438,7 +440,7 @@ export default defineComponent({
         permissionsLoaded.value = true;
       } else {
         console.error(
-          'Get user events failed:',
+          "Get user events failed:",
           response.status,
           response.data
         );
@@ -473,23 +475,23 @@ export default defineComponent({
       if (response.status === 200) {
         getUsersFromAPI();
         $q.notify({
-          message: 'Permisiunile utilizatorului au fost actualizate cu succes',
-          color: 'positive',
-          icon: 'done',
-          position: 'top-right',
+          message: "Permisiunile utilizatorului au fost actualizate cu succes",
+          color: "positive",
+          icon: "done",
+          position: "top-right",
           timeout: 2000,
         });
       } else {
         console.error(
-          'Update user events failed:',
+          "Update user events failed:",
           response.status,
           response.data
         );
         $q.notify({
-          message: 'Actualizarea permisiunilor utilizatorului a esuat',
-          color: 'negative',
-          icon: 'report_problem',
-          position: 'top-right',
+          message: "Actualizarea permisiunilor utilizatorului a esuat",
+          color: "negative",
+          icon: "report_problem",
+          position: "top-right",
           timeout: 2000,
         });
       }
