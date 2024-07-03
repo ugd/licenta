@@ -42,8 +42,8 @@ class InvitatiiController extends Controller
             'prenume' => 'required|string|max:255',
             'adresa_email' => 'required|string|max:255',
             'telefon' => 'nullable|string|max:255',
-            'eveniment_id' => 'required|int|max:255',
-            'invite_type_id' => 'required|int|max:255',
+            'eveniment_id' => 'required|int',
+            'invite_type_id' => 'required|int',
         ]);
 
         $code = strtoupper(Str::random(6));
@@ -70,7 +70,7 @@ class InvitatiiController extends Controller
     {
         $request->validate([
             'file' => 'required|mimes:csv,xls,xlsx',
-            'eveniment_id' => 'required|int|max:255',
+            'eveniment_id' => 'required|int',
         ]);
 
         Excel::import(new InvitatiiImport($request->eveniment_id), $request->file('file'));
@@ -88,8 +88,8 @@ class InvitatiiController extends Controller
             'prenume' => 'required|string|max:255',
             'adresa_email' => 'required|string|max:255',
             'telefon' => 'nullable|string|max:255',
-            'eveniment_id' => 'required|int|max:255',
-            'invite_type_id' => 'required|int|max:255',
+            'eveniment_id' => 'required|int',
+            'invite_type_id' => 'required|int',
         ]);
 
         $invitatii = Invitatii::findOrFail($id);
@@ -383,7 +383,7 @@ class InvitatiiController extends Controller
     public function sendMail(Request $request)
     {
         try {
-            $request->validate(['invite_id' => 'required|int|max:255']);
+            $request->validate(['invite_id' => 'required|int']);
             $invite = Invitatii::with('eveniment')->with('inviteType')->findOrFail($request->invite_id);
             $event = json_decode($invite->eveniment);
             $invite_type = json_decode($invite->inviteType);

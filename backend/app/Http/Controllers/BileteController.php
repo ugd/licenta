@@ -35,8 +35,8 @@ class BileteController extends Controller
     {
         $request->validate([
             'file' => 'required|mimes:csv,xls,xlsx',
-            'eveniment_id' => 'required|int|max:255',
-            'vendor_id' => 'required|int|max:255',
+            'eveniment_id' => 'required|int',
+            'vendor_id' => 'required|int',
         ]);
 
         Excel::import(new BileteImport($request->eveniment_id, $request->vendor_id), $request->file('file'));
